@@ -9,6 +9,7 @@ const (
 
 var (
 	varStringServiceType string
+	varStringServiceName string
 
 	// Cmd describes the command to run.
 	Cmd = cobrax.NewCommand("quickstart", cobrax.WithRunE(run))
@@ -16,4 +17,5 @@ var (
 
 func init() {
 	Cmd.Flags().StringVarPWithDefaultValue(&varStringServiceType, "service-type", "t", "mono")
+	Cmd.Flags().StringVarPWithDefaultValue(&varStringServiceName, "name", "n", "greet")
 }

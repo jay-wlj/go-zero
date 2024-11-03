@@ -12,9 +12,8 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-const baseDir = "greet"
-
 var (
+	baseDir    = "greet"
 	log        = console.NewColorConsole(true)
 	projectDir string
 )
@@ -49,6 +48,8 @@ func cleanWorkSpace(projectDir string) {
 func initProject() {
 	wd, err := os.Getwd()
 	logx.Must(err)
+
+	baseDir = varStringServiceName
 
 	projectDir = filepath.Join(wd, baseDir)
 	if exists := pathx.FileExists(projectDir); exists {

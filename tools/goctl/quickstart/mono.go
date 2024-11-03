@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
@@ -33,7 +34,26 @@ func initAPIFlags() error {
 		return err
 	}
 
-	apiFilename := filepath.Join(apiWorkDir, "greet.api")
+	varStringServiceName = strings.ToLower(varStringServiceName)
+	if varStringServiceName == "" {
+		varStringServiceName = "greet"
+	}
+
+	// replace service name
+	var apiFileName = varStringServiceName + ".api"
+	if varStringServiceName != "greet" {
+		apiContent = strings.ReplaceAll(apiContent, "greet", varStringServiceName)
+		svcContent = strings.ReplaceAll(svcContent, "GreetRpc", toUpperFirst(varStringServiceName)+"Rpc")
+		svcContent = strings.ReplaceAll(svcContent, "greet.Greet", varStringServiceName+"."+toUpperFirst(varStringServiceName))
+		svcContent = strings.ReplaceAll(svcContent, "greet.NewGreet", varStringServiceName+".New"+toUpperFirst(varStringServiceName))
+
+		apiLogicContent = strings.ReplaceAll(apiLogicContent, "GreetRpc", toUpperFirst(varStringServiceName)+"Rpc")
+		apiLogicContent = strings.ReplaceAll(apiLogicContent, "greet", varStringServiceName)
+
+	}
+
+	apiFilename := filepath.Join(apiWorkDir, apiFileName)
+
 	apiBytes := []byte(apiContent)
 	if err := os.WriteFile(apiFilename, apiBytes, 0o666); err != nil {
 		return err
@@ -58,7 +78,7 @@ func (m mono) createAPIProject() {
 	logx.Must(initAPIFlags())
 	log.Debug(">> Generating quickstart api project...")
 	logx.Must(gogen.GoCommand(nil, nil))
-	etcFile := filepath.Join(apiWorkDir, "etc", "greet.yaml")
+	etcFile := filepath.Join(apiWorkDir, "etc", varStringServiceName+".yaml")
 	logx.Must(os.WriteFile(etcFile, []byte(apiEtcContent), 0o666))
 	logicFile := filepath.Join(apiWorkDir, "internal", "logic", "pinglogic.go")
 	svcFile := filepath.Join(apiWorkDir, "internal", "svc", "servicecontext.go")
@@ -74,7 +94,7 @@ func (m mono) createAPIProject() {
 
 	var rpcClientPkg string
 	if m.callRPC {
-		rpcClientPath := filepath.Join(rpcWorkDir, "greet")
+		rpcClientPath := filepath.Join(rpcWorkDir, varStringServiceName)
 		rpcClientPkg, err = golang.GetParentPackage(rpcClientPath)
 		logx.Must(err)
 	}
